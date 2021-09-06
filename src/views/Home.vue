@@ -147,25 +147,25 @@ export default {
     var conn;
 
     var peer = new Peer({
-      host: "localhost",
-      port: 9000,
-      path: "/peerjs",
-      debug: 3,
-      config: {
-        iceServers: [
-          { url: "stun:stun1.l.google.com:19302" },
-          {
-            url: "turn:numb.viagenie.ca",
-            credential: "muazkh",
-            username: "webrtc@live.com",
-          },
-        ],
-      },
+      host: "peerjs-server.herokuapp.com",
+      secure: true,
+      port: 443,
+      // config: {
+      //   iceServers: [
+      //     { url: "stun:stun1.l.google.com:19302" },
+      //     {
+      //       url: "turn:numb.viagenie.ca",
+      //       credential: "muazkh",
+      //       username: "webrtc@live.com",
+      //     },
+      //   ],
+      // },
     });
     console.log(peer);
 
     peer.on("open", function () {
       document.getElementById("peer-id-label").innerHTML = peer.id;
+      console.log(peer.id);
     });
 
     peer.on("connection", function (connection) {
@@ -188,31 +188,23 @@ export default {
     });
 
     peer.on("call", function (call) {
-      var acceptsCall = confirm(
-        "Videocall incoming, do you want to accept it ?"
-      );
+      // Answer the call with your own video/audio stream
+      call.answer(window.localStream);
 
-      if (acceptsCall) {
-        // Answer the call with your own video/audio stream
-        call.answer(window.localStream);
+      // Receive data
+      call.on("stream", function (stream) {
+        // Store a global reference of the other user stream
+        window.peer_stream = stream;
+        // Display the stream of the other user in the peer-camera video element !
+        onReceiveStream(stream, "peer-camera");
+      });
 
-        // Receive data
-        call.on("stream", function (stream) {
-          // Store a global reference of the other user stream
-          window.peer_stream = stream;
-          // Display the stream of the other user in the peer-camera video element !
-          onReceiveStream(stream, "peer-camera");
-        });
+      // Handle when the call finishes
+      call.on("close", function () {
+        alert("The videocall has finished");
+      });
 
-        // Handle when the call finishes
-        call.on("close", function () {
-          alert("The videocall has finished");
-        });
-
-        // use call.close() to finish a call
-      } else {
-        console.log("Call denied !");
-      }
+      // use call.close() to finish a call
     });
 
     function requestLocalVideo(callbacks) {
