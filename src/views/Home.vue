@@ -147,7 +147,7 @@ export default {
     var conn;
 
     var peer = new Peer({
-      host: "157.245.101.140",
+      host: "localhost",
       port: 9000,
       path: "/peerjs",
       debug: 3,
